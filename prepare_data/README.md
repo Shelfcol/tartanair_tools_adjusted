@@ -1,0 +1,2 @@
+tartanair的groundTruth是没有时间戳的，所以需要将时间戳添上，所有都起始时间为0,间距为0.1s
+tartanair的评估工具需要估计的轨迹和groundTruth的size一样，所以我需要用rpg_evaluation将两条轨迹评估以后，得到对应的轨迹点的txt，然后将这些挑出来，再用这个工具去评估

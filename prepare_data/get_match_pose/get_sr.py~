@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
+
+#输入的是有时间戳的真值和估计值，根据时间戳的比值估计真值
+def get_sr(groundtruthFile,estimateFile):
+

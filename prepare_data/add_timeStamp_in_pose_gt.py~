@@ -1,0 +1,28 @@
+
+def write2File(filename, resultSet):
+"""
+函数说明：
+    将测试结果写入文件
+:param filename:
+    要写入的文件
+:param resultSet:
+    测试结果集合
+"""
+with open(filename, "r", encoding="utf-8") as f_read:
+    content = f_read.readlines()
+
+#print(content)
+
+index = 0
+length = len(resultSet)
+
+
+with open(filename, "w", encoding="utf-8") as f_write:
+    for i in range(length):
+        str = ''
+        temp = content[i].strip('\n')
+
+        str = temp + ',' + resultSet[i] + '\n'
+        index += 1
+
+        f_write.write(str)
