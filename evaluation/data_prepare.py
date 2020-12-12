@@ -3,11 +3,10 @@
 
 import os
 
-#函数输出groundtruthFile和estimateFile的名字，这里groundtruthFile的名字必须为pose_gt.txt
+#函数输出groundtruthFile和estimateFileList的名字，这里groundtruthFile的名字必须为pose_gt.txt,里面有5个估计轨迹，1个真实轨迹
 def get_gt_est_file():
     path=os.getcwd()#获取执行命令的文件夹位置
     groundtruthFile='pose_left.txt'
-    estimateFile=[]
     files= os.listdir(path) #得到文件夹下的所有文件名称
     has_gt_file=False
     for file in files:
@@ -26,14 +25,23 @@ def get_gt_est_file():
             txt_num=txt_num+1
             txt_file_list.append(file)
 
-    if txt_num!=2:
-        print('not have 2 txt file')
+    if txt_num!=6:
+        print('not have 6 txt file')
         exit()
-    if txt_file_list[0]==groundtruthFile:
-        estimateFile=txt_file_list[1]
-    else:
-        estimateFile=txt_file_list[0]
-    return groundtruthFile,estimateFile
+    estimateFileList=[]
+    for file in txt_file_list:
+        if file!=groundtruthFile:
+            #print(file)
+            estimateFileList.append(file)
+    if len(estimateFileList)!=5:
+        print("not have 5 estimate file")
+        exit()
+
+    return groundtruthFile,estimateFileList
+
+
+
+
 
 #给tartanair数据集的真值加时间戳,如果已经有时间戳，就不会加
 #input pose_gt.txt includes:      tx ty tz qx qy qz qw
@@ -81,6 +89,65 @@ def get_sr(groundtruthFile,estimateFile):
     sr=(est_end-est_start)/(gt_end-gt_start)
     print(sr)
     return sr
+
+#获取文件的time长度,这是的file是加了时间戳的
+def get_time_length(file):
+    with open(file, "r") as f_read:
+        content_gt=f_read.readlines()
+    list_start=content_gt[0].split(' ')
+    list_end=content_gt[-1].split(' ')
+    if len(list_start)!=8:
+        print("not right ")
+        exit()
+    start=float(list_start[0])
+    end=float(list_end[0])
+    time_length=end-start
+   
+    print(time_length)
+    return time_length
+
+
+#输入的是有时间戳的真值和估计值，根据时间戳的比值估计真值，这个是原始的轨迹文件，还没有进行对应的匹配
+def get_gt_timeLength(groundtruthFile):
+    with open(groundtruthFile, "r") as f_read:
+        content_gt=f_read.readlines()
+    if len(content_gt)==0:
+        return 0.0
+
+    gt_list_start=content_gt[0].split(' ')
+    gt_list_end=content_gt[-1].split(' ')
+    if len(gt_list_start)!=8:
+        print("not right ")
+        return
+    gt_start=float(gt_list_start[0])
+    gt_end=float(gt_list_end[0])
+
+    return gt_end-gt_start
+
+#获取sr_evaluate/文件夹里面的5个文件的timelength的平均值
+def get_est_file_timelength():
+    path=os.getcwd()#获取执行命令的文件夹位置
+    files= os.listdir(path+"/sr_evaluate/") #得到文件夹下的所有文件名称
+    
+    #找出其他的txt文件，如果文件夹没有两个txt文件，输出false
+    txt_num=0
+    txt_file_list=[]
+    for  file in files:
+        file_list=file.split('.')
+        if file_list[-1]=='txt':
+            txt_num=txt_num+1
+            txt_file_list.append(file)
+
+    if txt_num!=5:
+        print('not have 5 txt file')
+        exit()
+    time=0.0
+    num=0
+    for txt_file in txt_file_list:
+        time=time+get_time_length(txt_file)
+        num=num+1
+    average_time=time/num
+    return average_time
 
 
 def get_match_list(groundtruthFile,estimateFile):
@@ -167,11 +234,15 @@ def get_match_pose(groundtruthFile,estimateFile):
             else:
                 new_Est_data=new_Est_data+new_line[i]+'\n'
 
-    NewGtfilePath="pose_gt.txt"
-    NewEstfilePath="pose_est.txt"
+    est_file_list=estimateFile.split('.')
+
+    #print(est_file_list[0])
+    NewGtfilePath=est_file_list[0]+"pose_gt.txt"
+    NewEstfilePath=est_file_list[0]+"_pose_est.txt"
 
     with open(NewGtfilePath,"a+") as f:
         f.write(new_Gt_data)
             
     with open(NewEstfilePath,"a+") as f:
         f.write(new_Est_data)
+    return NewGtfilePath,NewEstfilePath

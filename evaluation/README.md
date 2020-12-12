@@ -6,3 +6,5 @@ python tartanair_evaluator.py
 
 ate_score就是rpg_evaluation中的rmse
 
+将真值pose_left.txt和5个估计轨迹txt文件（不用管名字）放在这个文件夹里面
+
